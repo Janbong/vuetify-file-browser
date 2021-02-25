@@ -11,9 +11,11 @@
             v-on:add-files="addUploadingFiles"
             v-on:folder-created="refreshPending = true"
         ></toolbar>
-        <v-row no-gutters>
-            <v-col v-if="tree && $vuetify.breakpoint.smAndUp" sm="auto">
-                <tree
+        <v-row no-gutters
+                    style="height: 90%"
+            ><v-col v-if="tree && $vuetify.breakpoint.smAndUp" sm="auto"
+                style="height: 100%"
+                ><tree
                     :path="path"
                     :storage="activeStorage"
                     :icons="icons"
@@ -23,11 +25,13 @@
                     v-on:path-changed="pathChanged"
                     v-on:loading="loadingChanged"
                     v-on:refreshed="refreshPending = false"
+                    style="height: 100%"
                 ></tree>
             </v-col>
             <v-divider v-if="tree" vertical></v-divider>
-            <v-col>
-                <list
+            <v-col
+                    style="height: 100%"
+                ><list
                     :path="path"
                     :storage="activeStorage"
                     :icons="icons"
@@ -38,6 +42,7 @@
                     v-on:loading="loadingChanged"
                     v-on:refreshed="refreshPending = false"
                     v-on:file-deleted="refreshPending = true"
+                    style="height: 100%"
                 ></list>
             </v-col>
         </v-row>
