@@ -4,11 +4,36 @@
         <v-card-text
             v-if="!path"
             class="grow d-flex justify-center align-center grey--text"
-        >Select a folder or a file</v-card-text>
-        <v-card-text
-            v-else-if="isFile"
-            class="grow d-flex justify-center align-center"
-        >File: {{ path }}</v-card-text>
+            >Select a folder or a file</v-card-text>
+        <v-card-text v-else-if="isFile" class="grow d-flex justify-center align-center">
+            <v-list subheader v-if="metadata.length">
+                <v-subheader>Metadata</v-subheader>
+                <v-list-item
+                    v-for="item in metadata"
+                    :key="item.attname"
+                    class="pl-0"
+                    >
+                    <v-list-item-avatar class="ma-0">
+                        <v-icon>{{ icons['other'] }}</v-icon>
+                    </v-list-item-avatar>
+
+                    <v-list-item-content class="py-2">
+                        <v-list-item-title v-text="item.attname"></v-list-item-title>
+                        <v-list-item-subtitle>{{ item.attvalue }}</v-list-item-subtitle>
+                    </v-list-item-content>
+
+                    <v-list-item-action>
+                        <v-btn icon @click.stop="deleteItem(item)">
+                            <v-icon color="grey lighten-1">mdi-delete-outline</v-icon>
+                        </v-btn>
+                        <v-btn icon v-if="false">
+                            <v-icon color="grey lighten-1">mdi-information</v-icon>
+                        </v-btn>
+                    </v-list-item-action>
+                </v-list-item>
+            </v-list>
+
+        </v-card-text>
         <v-card-text v-else-if="dirs.length || files.length" class="grow">
             <v-list subheader v-if="dirs.length">
                 <v-subheader>Folders</v-subheader>
@@ -17,7 +42,7 @@
                     :key="item.basename"
                     @click="changePath(item.path)"
                     class="pl-0"
-                >
+                    >
                     <v-list-item-avatar class="ma-0">
                         <v-icon>mdi-folder-outline</v-icon>
                     </v-list-item-avatar>
@@ -42,7 +67,7 @@
                     :key="item.basename"
                     @click="changePath(item.path)"
                     class="pl-0"
-                >
+                    >
                     <v-list-item-avatar class="ma-0">
                         <v-icon>{{ icons[item.extension.toLowerCase()] || icons['other'] }}</v-icon>
                     </v-list-item-avatar>
@@ -66,11 +91,11 @@
         <v-card-text
             v-else-if="filter"
             class="grow d-flex justify-center align-center grey--text py-5"
-        >No files or folders found</v-card-text>
+            >No files or folders found</v-card-text>
         <v-card-text
             v-else
             class="grow d-flex justify-center align-center grey--text py-5"
-        >The folder is empty</v-card-text>
+            >The folder is empty</v-card-text>
         <v-divider v-if="path"></v-divider>
         <v-toolbar v-if="false && path && isFile" dense flat class="shrink">
             <v-btn icon>
@@ -86,7 +111,7 @@
                 v-model="filter"
                 prepend-inner-icon="mdi-filter-outline"
                 class="ml-n3"
-            ></v-text-field>
+                ></v-text-field>
             <v-btn icon v-if="false">
                 <v-icon>mdi-eye-settings-outline</v-icon>
             </v-btn>
@@ -123,13 +148,19 @@ export default {
         dirs() {
             return this.items.filter(
                 item =>
-                    item.type === "dir" && item.basename.includes(this.filter)
+                item.type === "dir" && item.basename.includes(this.filter)
             );
         },
         files() {
             return this.items.filter(
                 item =>
-                    item.type === "file" && item.basename.includes(this.filter)
+                item.type === "file" && item.basename.includes(this.filter)
+            );
+        },
+        metadata() {
+            return this.items.filter(
+                item =>
+                item.type === "metadata" && item.attname.includes(this.filter)
             );
         },
         isDir() {
@@ -159,6 +190,16 @@ export default {
                 let response = await this.axios.request(config);
                 this.items = response.data;
             } else {
+                let url = this.endpoints.list.url
+                    .replace(new RegExp("{storage}", "g"), this.storage)
+                    .replace(new RegExp("{path}", "g"), this.path);
+
+                let config = {
+                    url,
+                    method: this.endpoints.list.method || "get"
+                };
+                let response = await this.axios.request(config);
+                this.items = response.data
                 // TODO: load file
             }
             this.$emit("loading", false);
@@ -167,24 +208,30 @@ export default {
             let confirmed = await this.$refs.confirm.open(
                 "Delete",
                 `Are you sure<br>you want to delete this ${
-                    item.type === "dir" ? "folder" : "file"
+                    item.type === "dir" ? "folder" 
+                        : item.type ==="file" ? "file"
+                        : "metadata item"
                 }?<br><em>${item.basename}</em>`
             );
 
             if (confirmed) {
-                this.$emit("loading", true);
-                let url = this.endpoints.delete.url
-                    .replace(new RegExp("{storage}", "g"), this.storage)
-                    .replace(new RegExp("{path}", "g"), item.path);
+                if (item.type != "metadata"){
+                    this.$emit("loading", true);
+                    let url = this.endpoints.delete.url
+                        .replace(new RegExp("{storage}", "g"), this.storage)
+                        .replace(new RegExp("{path}", "g"), item.path);
 
-                let config = {
-                    url,
-                    method: this.endpoints.delete.method || "post"
-                };
+                    let config = {
+                        url,
+                        method: this.endpoints.delete.method || "post"
+                    };
 
-                await this.axios.request(config);
-                this.$emit("file-deleted");
-                this.$emit("loading", false);
+                    await this.axios.request(config);
+                    this.$emit("file-deleted");
+                    this.$emit("loading", false);
+                } else {
+                    // TODO: Remove metadata
+                }
             }
         }
     },
