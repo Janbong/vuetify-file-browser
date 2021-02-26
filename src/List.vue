@@ -102,7 +102,7 @@
                 <v-icon>mdi-download</v-icon>
             </v-btn>
         </v-toolbar>
-        <v-toolbar v-if="path && isDir" dense flat class="shrink">
+        <v-toolbar v-if="path" dense flat class="shrink">
             <v-text-field
                 solo
                 flat
