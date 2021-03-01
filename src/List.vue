@@ -14,15 +14,15 @@
                     :nudge-width="200"
                     offset-y
                     >
-                    <template v-slot:activator="{ on }">
-                        <v-btn v-if="path" icon v-on="on" title="Create Metadata">
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-btn v-if="path" icon v-bind="attrs" v-on="on" title="Create Metadata">
                             <v-icon>mdi-plus-circle</v-icon>
                         </v-btn>
                     </template>
                     <v-card>
                         <v-card-title>Create Metadata</v-card-title>
                         <v-card-text>
-                            <v-form ref="metaForm" lazy-validation v-model="validMetaForm">
+                            <v-form ref="mkMetaForm" lazy-validation v-model="validMkMetaForm">
                                 <v-text-field :rules="fieldRules" required label="Name" v-model="newMetadataName" hide-details></v-text-field>
                                 <v-text-field :rules="fieldRules" required label="Value" v-model="newMetadataValue" hide-details></v-text-field>
                                 <v-text-field label="Unit" v-model="newMetadataUnit" hide-details></v-text-field>
@@ -33,27 +33,34 @@
                             <v-btn @click="newMetadataPopper = false" depressed>Cancel</v-btn>
                             <v-btn
                                 color="success"
-                                :disabled="!validMetaForm"
+                                :disabled="!validMkMetaForm"
                                 depressed
-                                @click="mkmetadata"
+                                @click="mkMetadata"
                                 >Create Metadata</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-menu>
-                <v-list-item
-                    v-for="item in metadata"
-                    :key="item.attname"
-                    class="pl-0"
+                <v-menu
+                    v-for="item, index in metadata"
+                    :key="index"
+                    :value="editMetadataFormOpen"
+                    :close-on-content-click="false"
+                    :nudge-width="200"
+                    offset-y
                     >
-                    <v-list-item-avatar class="ma-0">
-                        <v-icon>{{ icons['other'] }}</v-icon>
-                    </v-list-item-avatar>
-
+                    <template v-slot:activator="{ attrs, on }">
+                        <v-list-item
+                            class="pl-0"
+                            v-bind="attrs"
+                            v-on="on"
+                            >
+                            <v-list-item-avatar class="ma-0">
+                                <v-icon>{{ icons['other'] }}</v-icon>
+                            </v-list-item-avatar>
                     <v-list-item-content class="py-2">
                         <v-list-item-title v-text="item.attname"></v-list-item-title>
                         <v-list-item-subtitle>{{ item.attvalue }}</v-list-item-subtitle>
                     </v-list-item-content>
-
                     <v-list-item-action>
                         <v-btn icon @click.stop="deleteItem(item)">
                             <v-icon color="grey lighten-1">mdi-delete-outline</v-icon>
@@ -62,7 +69,29 @@
                             <v-icon color="grey lighten-1">mdi-information</v-icon>
                         </v-btn>
                     </v-list-item-action>
-                </v-list-item>
+                    </template>
+                    <v-card>
+                        <v-card-title>Edit Metadata</v-card-title>
+                        <v-card-text>
+                            <v-form :ref="'editMetaForm' + index" lazy-validation v-model="validEditMetaForm">
+                                <v-text-field :rules="fieldRules" required label="Name" v-model="newMetadataName" hide-details></v-text-field>
+                                <v-text-field :rules="fieldRules" required label="Value" v-model="newMetadataValue" hide-details></v-text-field>
+                                <v-text-field label="Unit" v-model="newMetadataUnit" hide-details></v-text-field>
+                            </v-form>
+                        </v-card-text>
+                        <v-card-actions>
+                            <div class="flex-grow-1"></div>
+                            <v-btn @click="editMetadataFormOpen = false" depressed>Cancel</v-btn>
+                            <v-btn
+                                color="success"
+                                :disabled="!validEditMetaForm"
+                                depressed
+                                @click="editMetadata(index)"
+                                >Edit Metadata</v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-menu>
+                        </v-list-item>
             </v-list>
 
         </v-card-text>
@@ -173,7 +202,9 @@ export default {
     data() {
         return {
             items: [],
-            validMetaForm: true,
+            validEditMetaForm: true,
+            validMkMetaForm: true,
+            editMetadataFormOpen: false,
             filter: "",
             newMetadataName: "",
             netMetadataValue: "",
@@ -270,21 +301,65 @@ export default {
                     this.$emit("file-deleted");
                     this.$emit("loading", false);
                 } else {
-                    // TODO: Remove metadata
+                    this.$emit("loading", true);
+                    let url = this.endpoints.rmmetadata.url
+                        .replace(new RegExp("{storage}", "g"), this.storage)
+                        .replace(new RegExp("{path}", "g"), item.path);
+
+                    let config = {
+                        url,
+                        method: this.endpoints.rmmetadata.method || "delete",
+                        data: { 
+                            'attname': item.attname,
+                            'attvalue': item.attvalue,
+                            'attunit': item.attunit,
+                        }
+                    };
+
+                    await this.axios.request(config);
+                    this.$emit("file-deleted");
+                    this.$emit("loading", false);
                 }
             }
         },
-        async mkmetadata() {
-            this.validMetaForm = this.$refs.metaForm.validate()
-            if(this.validMetaForm) {
+        async mkMetadata() {
+            this.validMkMetaForm = this.$refs.mkMetaForm.validate()
+            if(this.validMkMetaForm) {
                 this.$emit("loading", true);
                 let url = this.endpoints.mkmetadata.url
+                    .replace(new RegExp("{storage}", "g"), this.storage)
+                    .replace(new RegExp("{path}", "g"), this.path);
+
+                let config = {
+                    url,
+                    method: this.endpoints.mkmetadata.method || "post",
+                    data: { 
+                        'attname': this.newMetadataName,
+                        'attvalue': this.newMetadataValue,
+                        'attunit': this.newMetadataUnit,
+                    }
+                };
+
+                await this.axios.request(config);
+                this.$emit("metadata-created", this.newMetadataName);
+                this.newMetadataPopper = false;
+                this.newMetadataName = "";
+                this.newMetadataValue = "";
+                this.$emit("loading", false);
+            }
+        },
+        async editMetadata(index) {
+            this.validEditMetaForm = this.$refs['editMetaForm' + index][0].validate()
+            console.log(this.$refs['editMetaForm' + index][0])
+            if(this.validEditMetaForm) {
+                this.$emit("loading", true);
+                let url = this.endpoints.editmetadata.url
                     .replace(new RegExp("{storage}", "g"), this.storage)
                     .replace(new RegExp("{path}", "g"), this.path + this.newMetadataName);
 
                 let config = {
                     url,
-                    method: this.endpoints.mkmetadata.method || "post"
+                    method: this.endpoints.editmetadata.method || "post"
                 };
 
                 await this.axios.request(config);
@@ -295,6 +370,7 @@ export default {
                 this.$emit("loading", false);
             }
         }
+
     },
     watch: {
         async path() {

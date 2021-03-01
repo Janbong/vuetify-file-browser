@@ -86,7 +86,10 @@ const endpoints = {
     upload: { url: "/storage/{storage}/upload?path={path}", method: "post" },
     mkdir: { url: "/storage/{storage}/mkdir?path={path}", method: "post" },
     delete: { url: "/storage/{storage}/delete?path={path}", method: "post" },
-    zone: { url: "/storage/{storage}/zone", method: "get" }
+    zone: { url: "/storage/{storage}/zone", method: "get" },
+    mkmetadata: { url: "/storage/{storage}/meta?path={path}", method: "post" },
+    editmetadata: { url: "/storage/{storage}/meta?path={path}", method: "post" },
+    rmmetadata: { url: "/storage/{storage}/meta?path={path}", method: "delete" }
 };
 
 const fileIcons = {
