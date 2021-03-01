@@ -14,11 +14,11 @@
                 activatable
                 transition
                 class="folders-tree"
-            >
+                >
                 <template v-slot:prepend="{ item, open }">
                     <v-icon
                         v-if="item.type === 'dir'"
-                    >{{ open ? 'mdi-folder-open-outline' : 'mdi-folder-outline' }}</v-icon>
+                        >{{ open ? 'mdi-folder-open-outline' : 'mdi-folder-outline' }}</v-icon>
                     <v-icon v-else>{{ icons[item.extension.toLowerCase()] || icons['other'] }}</v-icon>
                 </template>
                 <template v-slot:label="{ item }">
@@ -28,7 +28,7 @@
                         v-if="item.type === 'dir'"
                         @click.stop="readFolder(item)"
                         class="ml-1"
-                    >
+                        >
                         <v-icon class="pa-0 mdi-18px" color="grey lighten-1">mdi-refresh</v-icon>
                     </v-btn>
                 </template>
@@ -44,7 +44,7 @@
                 v-model="filter"
                 prepend-inner-icon="mdi-filter-outline"
                 class="ml-n3"
-            ></v-text-field>
+                ></v-text-field>
             <v-tooltip top>
                 <template v-slot:activator="{ on }">
                     <v-btn icon @click="init" v-on="on">
@@ -72,23 +72,26 @@ export default {
             open: [],
             active: [],
             items: [],
-            filter: ""
+            filter: "",
+            irodsZone: "iRODS Zone"
         };
     },
     methods: {
-        init() {
+        async init() {
             this.open = [];
             this.items = [];
+
             // set default files tree items (root item) in nextTick.
             // Otherwise this.open isn't cleared properly (due to syncing perhaps)
+            let title = await this.getZone()
             setTimeout(() => {
                 this.items = [
                     {
                         type: "dir",
                         path: "/",
-                        basename: "root",
+                        basename: title,
                         extension: "",
-                        name: "root",
+                        name: title,
                         children: []
                     }
                 ];
@@ -115,10 +118,10 @@ export default {
                 if (item.type === "dir") {
                     item.children = [];
                 }
+                this.$emit("loading", false);
                 return item;
             });
 
-            this.$emit("loading", false);
         },
         activeChanged(active) {
             this.active = active;
@@ -144,7 +147,23 @@ export default {
                 }
             }
             return null;
-        }
+        },
+        async getZone() {
+            let url = this.endpoints.zone.url
+                .replace(new RegExp("{storage}", "g"), this.storage);
+
+            let config = {
+                url,
+                method: this.endpoints.zone.method || "get"
+            };
+
+            let response = await this.axios.request(config);
+
+            // eslint-disable-next-line require-atomic-updates
+            console.log(response);
+            return response.data;
+
+        },
     },
     watch: {
         storage() {

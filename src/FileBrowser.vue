@@ -75,27 +75,18 @@ import Upload from "./Upload.vue";
 
 const availableStorages = [
     {
-        name: "Local",
+        name: "iRODS",
         code: "local",
         icon: "mdi-folder-multiple-outline"
     },
-    {
-        name: "Amazon S3",
-        code: "s3",
-        icon: "mdi-amazon-drive"
-    }
-    /*{
-        name: "Dropbox",
-        code: "dropbox",
-        icon: "mdi-dropbox"
-    }*/
 ];
 
 const endpoints = {
     list: { url: "/storage/{storage}/list?path={path}", method: "get" },
     upload: { url: "/storage/{storage}/upload?path={path}", method: "post" },
     mkdir: { url: "/storage/{storage}/mkdir?path={path}", method: "post" },
-    delete: { url: "/storage/{storage}/delete?path={path}", method: "post" }
+    delete: { url: "/storage/{storage}/delete?path={path}", method: "post" },
+    zone: { url: "/storage/{storage}/zone", method: "get" }
 };
 
 const fileIcons = {
