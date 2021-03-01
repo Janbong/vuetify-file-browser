@@ -8,6 +8,38 @@
         <v-card-text v-else-if="isFile" class="grow d-flex justify-center align-center">
             <v-list subheader v-if="metadata.length">
                 <v-subheader>Metadata</v-subheader>
+                <v-menu
+                    v-model="newMetadataPopper"
+                    :close-on-content-click="false"
+                    :nudge-width="200"
+                    offset-y
+                    >
+                    <template v-slot:activator="{ on }">
+                        <v-btn v-if="path" icon v-on="on" title="Create Metadata">
+                            <v-icon>mdi-plus-circle</v-icon>
+                        </v-btn>
+                    </template>
+                    <v-card>
+                        <v-card-title>Create Metadata</v-card-title>
+                        <v-card-text>
+                            <v-form ref="metaForm" lazy-validation v-model="validMetaForm">
+                                <v-text-field :rules="fieldRules" required label="Name" v-model="newMetadataName" hide-details></v-text-field>
+                                <v-text-field :rules="fieldRules" required label="Value" v-model="newMetadataValue" hide-details></v-text-field>
+                                <v-text-field label="Unit" v-model="newMetadataUnit" hide-details></v-text-field>
+                            </v-form>
+                        </v-card-text>
+                        <v-card-actions>
+                            <div class="flex-grow-1"></div>
+                            <v-btn @click="newMetadataPopper = false" depressed>Cancel</v-btn>
+                            <v-btn
+                                color="success"
+                                :disabled="!validMetaForm"
+                                depressed
+                                @click="mkmetadata"
+                                >Create Metadata</v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-menu>
                 <v-list-item
                     v-for="item in metadata"
                     :key="item.attname"
@@ -141,7 +173,15 @@ export default {
     data() {
         return {
             items: [],
-            filter: ""
+            validMetaForm: true,
+            filter: "",
+            newMetadataName: "",
+            netMetadataValue: "",
+            netMetadataUnit: "",
+            newMetadataPopper: false,
+            fieldRules: [
+                v => !!v || 'This field is required',
+            ],
         };
     },
     computed: {
@@ -232,6 +272,27 @@ export default {
                 } else {
                     // TODO: Remove metadata
                 }
+            }
+        },
+        async mkmetadata() {
+            this.validMetaForm = this.$refs.metaForm.validate()
+            if(this.validMetaForm) {
+                this.$emit("loading", true);
+                let url = this.endpoints.mkmetadata.url
+                    .replace(new RegExp("{storage}", "g"), this.storage)
+                    .replace(new RegExp("{path}", "g"), this.path + this.newMetadataName);
+
+                let config = {
+                    url,
+                    method: this.endpoints.mkmetadata.method || "post"
+                };
+
+                await this.axios.request(config);
+                this.$emit("metadata-created", this.newMetadataName);
+                this.newMetadataPopper = false;
+                this.newMetadataName = "";
+                this.newMetadataValue = "";
+                this.$emit("loading", false);
             }
         }
     },
