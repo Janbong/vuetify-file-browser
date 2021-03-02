@@ -41,7 +41,7 @@
                         </v-card-actions>
                     </v-card>
                 </v-menu>
-                <v-card v-if="metadata.length">
+                <v-card max-width=600 v-if="metadata.length">
                     <v-list-item
                         v-for="item, index in metadata"
                         :key="index"
@@ -53,8 +53,8 @@
                             <v-icon>{{ icons['other'] }}</v-icon>
                         </v-list-item-avatar>
                         <v-list-item-content class="py-2">
-                            <v-list-item-title v-text="item.attname"></v-list-item-title>
-                            <v-list-item-subtitle v-if="item.attunits">{{ item.attvalue }} ({{item.attunits}})</v-list-item-subtitle>
+                            <v-list-item-title class="text-wrap" v-text="item.attname"></v-list-item-title>
+                            <v-list-item-subtitle class="text-wrap" v-if="item.attunits">{{ item.attvalue }} ({{item.attunits}})</v-list-item-subtitle>
                             <v-list-item-subtitle v-else >{{ item.attvalue }}</v-list-item-subtitle>
                         </v-list-item-content>
                         <v-list-item-action>
