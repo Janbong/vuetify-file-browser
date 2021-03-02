@@ -21,6 +21,7 @@
                     </template>
                     <v-card>
                         <v-card-title>Create Metadata</v-card-title>
+                        <v-card-subtitle v-if="addMetaError" class="error">{{addMetaError}}</v-card-subtitle>
                         <v-card-text>
                             <v-form ref="mkMetaForm" lazy-validation v-model="validMkMetaForm">
                                 <v-text-field :rules="fieldRules" required label="Name" v-model="newMetadataName" hide-details></v-text-field>
@@ -181,6 +182,7 @@ export default {
             filter: "",
             newMetadataName: "",
             netMetadataValue: "",
+            addMetaError: "",
             netMetadataUnit: "",
             newMetadataPopper: false,
             fieldRules: [
@@ -313,12 +315,21 @@ export default {
                     }
                 };
 
-                await this.axios.request(config);
-                this.newMetadataPopper = false;
-                this.newMetadataName = "";
-                this.newMetadataValue = "";
-                this.$emit("file-deleted");
-                this.$emit("loading", false);
+                await this.axios.request(config)
+                    .then((res) => {
+                        this.addMetaError = "";
+                        this.newMetadataPopper = false;
+                        this.newMetadataName = "";
+                        this.newMetadataValue = "";
+                        this.$emit("file-deleted");
+                        this.$emit("loading", false);
+                    }).catch((error) => {
+                        if(error.response) {
+                            this.addMetaError = error.response.data;
+                        } else {
+                            this.addMetaError = "Unknown error";
+                        }
+                    });
             }
         },
         /*
