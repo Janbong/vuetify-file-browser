@@ -118,9 +118,10 @@ export default {
                 if (item.type === "dir") {
                     item.children = [];
                 }
-                this.$emit("loading", false);
                 return item;
             });
+            
+            this.$emit("loading", false);
 
         },
         activeChanged(active) {
