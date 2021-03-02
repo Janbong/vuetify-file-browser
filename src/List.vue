@@ -6,7 +6,7 @@
             class="grow d-flex justify-center align-center grey--text"
             >Select a folder or a file</v-card-text>
         <v-card-text v-else-if="isFile" class="grow d-flex justify-center align-center">
-            <v-list subheader v-if="metadata.length">
+            <v-list subheader >
                 <v-subheader>Metadata</v-subheader>
                 <v-menu
                     v-model="newMetadataPopper"
@@ -40,29 +40,31 @@
                         </v-card-actions>
                     </v-card>
                 </v-menu>
-                <v-list-item
-                    v-for="item, index in metadata"
-                    :key="index"
-                    class="pl-0"
-                    v-bind="attrs"
-                    v-on="on"
-                    >
-                    <v-list-item-avatar class="ma-0">
-                        <v-icon>{{ icons['other'] }}</v-icon>
-                    </v-list-item-avatar>
-                    <v-list-item-content class="py-2">
-                        <v-list-item-title v-text="item.attname"></v-list-item-title>
-                        <v-list-item-subtitle>{{ item.attvalue }}</v-list-item-subtitle>
-                    </v-list-item-content>
-                    <v-list-item-action>
-                        <v-btn icon @click.stop="deleteItem(item)">
-                            <v-icon color="grey lighten-1">mdi-delete-outline</v-icon>
-                        </v-btn>
-                        <v-btn icon v-if="false">
-                            <v-icon color="grey lighten-1">mdi-information</v-icon>
-                        </v-btn>
-                    </v-list-item-action>
-                </v-list-item>
+                <v-card v-if="metadata.length">
+                    <v-list-item
+                        v-for="item, index in metadata"
+                        :key="index"
+                        class="pl-0"
+                        v-bind="attrs"
+                        v-on="on"
+                        >
+                        <v-list-item-avatar class="ma-0">
+                            <v-icon>{{ icons['other'] }}</v-icon>
+                        </v-list-item-avatar>
+                        <v-list-item-content class="py-2">
+                            <v-list-item-title v-text="item.attname"></v-list-item-title>
+                            <v-list-item-subtitle>{{ item.attvalue }}</v-list-item-subtitle>
+                        </v-list-item-content>
+                        <v-list-item-action>
+                            <v-btn icon @click.stop="deleteItem(item)">
+                                <v-icon color="grey lighten-1">mdi-delete-outline</v-icon>
+                            </v-btn>
+                            <v-btn icon v-if="false">
+                                <v-icon color="grey lighten-1">mdi-information</v-icon>
+                            </v-btn>
+                        </v-list-item-action>
+                    </v-list-item>
+                </v-card>
             </v-list>
 
         </v-card-text>
@@ -349,12 +351,12 @@ export default {
             this.items = [];
             await this.load();
         },
-        async refreshPending() {
-            if (this.refreshPending) {
-                await this.load();
-                this.$emit("refreshed");
+            async refreshPending() {
+                if (this.refreshPending) {
+                    await this.load();
+                    this.$emit("refreshed");
+                }
             }
-        }
     }
 };
 </script>
