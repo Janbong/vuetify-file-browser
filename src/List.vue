@@ -26,7 +26,7 @@
                             <v-form ref="mkMetaForm" lazy-validation v-model="validMkMetaForm">
                                 <v-text-field :rules="fieldRules" required label="Name" v-model="newMetadataName" hide-details></v-text-field>
                                 <v-text-field :rules="fieldRules" required label="Value" v-model="newMetadataValue" hide-details></v-text-field>
-                                <v-text-field label="Unit" v-model="newMetadataUnit" hide-details></v-text-field>
+                                <v-text-field label="Units" v-model="newMetadataUnits" hide-details></v-text-field>
                             </v-form>
                         </v-card-text>
                         <v-card-actions>
@@ -54,7 +54,8 @@
                         </v-list-item-avatar>
                         <v-list-item-content class="py-2">
                             <v-list-item-title v-text="item.attname"></v-list-item-title>
-                            <v-list-item-subtitle>{{ item.attvalue }}</v-list-item-subtitle>
+                            <v-list-item-subtitle v-if="item.attunits">{{ item.attvalue }} ({{item.attunits}})</v-list-item-subtitle>
+                            <v-list-item-subtitle v-else >{{ item.attvalue }}</v-list-item-subtitle>
                         </v-list-item-content>
                         <v-list-item-action>
                             <v-btn icon @click.stop="deleteItem(item)">
@@ -183,7 +184,7 @@ export default {
             newMetadataName: "",
             netMetadataValue: "",
             addMetaError: "",
-            netMetadataUnit: "",
+            netMetadataUnits: "",
             newMetadataPopper: false,
             fieldRules: [
                 v => !!v || 'This field is required',
@@ -287,7 +288,7 @@ export default {
                         data: { 
                             'attname': item.attname,
                             'attvalue': item.attvalue,
-                            'attunit': item.attunit,
+                            'attunits': item.attunits,
                         }
                     };
 
@@ -311,7 +312,7 @@ export default {
                     data: { 
                         'attname': this.newMetadataName,
                         'attvalue': this.newMetadataValue,
-                        'attunit': this.newMetadataUnit,
+                        'attunits': this.newMetadataUnits,
                     }
                 };
 
