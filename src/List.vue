@@ -40,23 +40,16 @@
                         </v-card-actions>
                     </v-card>
                 </v-menu>
-                <v-menu
+                <v-list-item
                     v-for="item, index in metadata"
                     :key="index"
-                    :value="editMetadataFormOpen"
-                    :close-on-content-click="false"
-                    :nudge-width="200"
-                    offset-y
+                    class="pl-0"
+                    v-bind="attrs"
+                    v-on="on"
                     >
-                    <template v-slot:activator="{ attrs, on }">
-                        <v-list-item
-                            class="pl-0"
-                            v-bind="attrs"
-                            v-on="on"
-                            >
-                            <v-list-item-avatar class="ma-0">
-                                <v-icon>{{ icons['other'] }}</v-icon>
-                            </v-list-item-avatar>
+                    <v-list-item-avatar class="ma-0">
+                        <v-icon>{{ icons['other'] }}</v-icon>
+                    </v-list-item-avatar>
                     <v-list-item-content class="py-2">
                         <v-list-item-title v-text="item.attname"></v-list-item-title>
                         <v-list-item-subtitle>{{ item.attvalue }}</v-list-item-subtitle>
@@ -69,29 +62,7 @@
                             <v-icon color="grey lighten-1">mdi-information</v-icon>
                         </v-btn>
                     </v-list-item-action>
-                    </template>
-                    <v-card>
-                        <v-card-title>Edit Metadata</v-card-title>
-                        <v-card-text>
-                            <v-form :ref="'editMetaForm' + index" lazy-validation v-model="validEditMetaForm">
-                                <v-text-field :rules="fieldRules" required label="Name" v-model="newMetadataName" hide-details></v-text-field>
-                                <v-text-field :rules="fieldRules" required label="Value" v-model="newMetadataValue" hide-details></v-text-field>
-                                <v-text-field label="Unit" v-model="newMetadataUnit" hide-details></v-text-field>
-                            </v-form>
-                        </v-card-text>
-                        <v-card-actions>
-                            <div class="flex-grow-1"></div>
-                            <v-btn @click="editMetadataFormOpen = false" depressed>Cancel</v-btn>
-                            <v-btn
-                                color="success"
-                                :disabled="!validEditMetaForm"
-                                depressed
-                                @click="editMetadata(index)"
-                                >Edit Metadata</v-btn>
-                        </v-card-actions>
-                    </v-card>
-                </v-menu>
-                        </v-list-item>
+                </v-list-item>
             </v-list>
 
         </v-card-text>
@@ -202,9 +173,9 @@ export default {
     data() {
         return {
             items: [],
-            validEditMetaForm: true,
+            //validEditMetaForm: true,
             validMkMetaForm: true,
-            editMetadataFormOpen: false,
+            //editMetadataFormOpen: false,
             filter: "",
             newMetadataName: "",
             netMetadataValue: "",
@@ -348,14 +319,15 @@ export default {
                 this.$emit("loading", false);
             }
         },
-        async editMetadata(index) {
+        /*
+        //async editMetadata(index,item) {
             this.validEditMetaForm = this.$refs['editMetaForm' + index][0].validate()
             console.log(this.$refs['editMetaForm' + index][0])
             if(this.validEditMetaForm) {
                 this.$emit("loading", true);
                 let url = this.endpoints.editmetadata.url
                     .replace(new RegExp("{storage}", "g"), this.storage)
-                    .replace(new RegExp("{path}", "g"), this.path + this.newMetadataName);
+                    .replace(new RegExp("{path}", "g"), this.path);
 
                 let config = {
                     url,
@@ -370,7 +342,7 @@ export default {
                 this.$emit("loading", false);
             }
         }
-
+         */
     },
     watch: {
         async path() {
