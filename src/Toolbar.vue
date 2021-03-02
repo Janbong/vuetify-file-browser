@@ -54,7 +54,7 @@
                 offset-y
             >
                 <template v-slot:activator="{ on }">
-                    <v-btn v-if="path" icon v-on="on" title="Create Folder">
+                    <v-btn v-if="path && isFolder()" icon v-on="on" title="Create Folder">
                         <v-icon>mdi-folder-plus-outline</v-icon>
                     </v-btn>
                 </template>
@@ -74,7 +74,7 @@
                     </v-card-actions>
                 </v-card>
             </v-menu>
-            <v-btn v-if="path" icon @click="$refs.inputUpload.click()" title="Upload Files">
+            <v-btn v-if="path && isFolder()" icon @click="$refs.inputUpload.click()" title="Upload Files">
                 <v-icon>mdi-plus-circle</v-icon>
                 <input v-show="false" ref="inputUpload" type="file" multiple @change="addFiles" />
             </v-btn>
@@ -119,6 +119,10 @@ export default {
         }
     },
     methods: {
+        isFolder() {
+            let isFolder = this.path[this.path.length - 1] === "/";
+            return isFolder;
+        },
         changeStorage(code) {
             if (this.storage != code) {
                 this.$emit("storage-changed", code);
