@@ -312,10 +312,10 @@ export default {
                 };
 
                 await this.axios.request(config);
-                this.$emit("metadata-created", this.newMetadataName);
                 this.newMetadataPopper = false;
                 this.newMetadataName = "";
                 this.newMetadataValue = "";
+                this.$emit("file-deleted");
                 this.$emit("loading", false);
             }
         },
