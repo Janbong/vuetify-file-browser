@@ -76,7 +76,7 @@ import Upload from "./Upload.vue";
 const availableStorages = [
     {
         name: "iRODS",
-        code: "local",
+        code: "irods",
         icon: "mdi-folder-multiple-outline"
     },
 ];
@@ -132,7 +132,7 @@ export default {
             default: () => availableStorages.map(item => item.code).join(",")
         },
         // code of default storage
-        storage: { type: String, default: "local" },
+        storage: { type: String, default: "irods" },
         // show tree view
         tree: { type: Boolean, default: true },
         // file icons set
