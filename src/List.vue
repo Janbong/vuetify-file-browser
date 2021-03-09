@@ -114,12 +114,17 @@
                     </v-list-item-content>
 
                     <v-list-item-action>
-                        <v-btn icon @click.stop="deleteItem(item)">
-                            <v-icon color="grey lighten-1">mdi-delete-outline</v-icon>
-                        </v-btn>
-                        <v-btn icon v-if="false">
-                            <v-icon color="grey lighten-1">mdi-information</v-icon>
-                        </v-btn>
+                        <v-row>
+                            <v-btn icon @click.stop="deleteItem(item)">
+                                <v-icon color="grey lighten-1">mdi-delete-outline</v-icon>
+                            </v-btn>
+                            <v-btn icon v-if="false">
+                                <v-icon color="grey lighten-1">mdi-information</v-icon>
+                            </v-btn>
+                            <v-btn icon @click.stop="" :href="'/api/storage/irods/download?path=' + item.path" target=_blank>
+                                <v-icon color="grey lighten-1">mdi-download</v-icon>
+                            </v-btn>
+                        </v-row>
                     </v-list-item-action>
                 </v-list-item>
             </v-list>
@@ -333,6 +338,19 @@ export default {
                     });
             }
         },
+        async downloadItem(item) {
+            this.$emit("loading", true);
+            let url = this.endpoints.download.url
+                .replace(new RegExp("{storage}", "g"), this.storage)
+                .replace(new RegExp("{path}", "g"), item.path);
+            window.location = url
+            let config = {
+                url,
+                method: this.endpoints.download.method || "get",
+            };
+
+            await this.axios.request(config);
+        },
         /*
         //async editMetadata(index,item) {
             this.validEditMetaForm = this.$refs['editMetaForm' + index][0].validate()
@@ -363,12 +381,12 @@ export default {
             this.items = [];
             await this.load();
         },
-            async refreshPending() {
-                if (this.refreshPending) {
-                    await this.load();
-                    this.$emit("refreshed");
-                }
+        async refreshPending() {
+            if (this.refreshPending) {
+                await this.load();
+                this.$emit("refreshed");
             }
+        }
     }
 };
 </script>

@@ -89,7 +89,8 @@ const endpoints = {
     zone: { url: "/storage/{storage}/zone", method: "get" },
     mkmetadata: { url: "/storage/{storage}/meta?path={path}", method: "post" },
     editmetadata: { url: "/storage/{storage}/meta?path={path}", method: "post" },
-    rmmetadata: { url: "/storage/{storage}/meta?path={path}", method: "delete" }
+    rmmetadata: { url: "/storage/{storage}/meta?path={path}", method: "delete" },
+    download: { url: "/storage/{storage}/download?path={path}", method: "get" }
 };
 
 const fileIcons = {
