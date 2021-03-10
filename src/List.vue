@@ -5,7 +5,7 @@
             v-if="!path"
             class="grow d-flex justify-center align-center grey--text"
             >Select a folder or a file</v-card-text>
-        <v-card-text v-else-if="isFile" class="grow d-flex justify-center align-center">
+        <v-card-text v-else-if="isFile || isDir && metadata.length > 0" class="grow d-flex justify-center align-center">
             <v-list subheader >
                 <v-subheader>Metadata</v-subheader>
                 <v-menu
@@ -71,6 +71,7 @@
 
         </v-card-text>
         <v-card-text v-else-if="dirs.length || files.length" class="grow">
+            <v-btn @click="loadDirMeta">View Metadata</v-btn>
             <v-list subheader v-if="dirs.length">
                 <v-subheader>Folders</v-subheader>
                 <v-list-item
@@ -375,6 +376,23 @@ export default {
             }
         }
          */
+        async loadDirMeta() {
+            this.$emit("loading", true);
+            if (this.isDir) {
+                let url = this.endpoints.listmeta.url
+                    .replace(new RegExp("{storage}", "g"), this.storage)
+                    .replace(new RegExp("{path}", "g"), this.path);
+
+                let config = {
+                    url,
+                    method: this.endpoints.listmeta.method || "get"
+                };
+
+                let response = await this.axios.request(config);
+                this.items = response.data;
+            }
+            this.$emit("loading", false);
+        }
     },
     watch: {
         async path() {

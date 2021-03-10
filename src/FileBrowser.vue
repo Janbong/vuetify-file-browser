@@ -83,6 +83,7 @@ const availableStorages = [
 
 const endpoints = {
     list: { url: "/storage/{storage}/list?path={path}", method: "get" },
+    listmeta: { url: "/storage/{storage}/meta?path={path}", method: "get" },
     upload: { url: "/storage/{storage}/upload?path={path}", method: "post" },
     mkdir: { url: "/storage/{storage}/mkdir?path={path}", method: "post" },
     delete: { url: "/storage/{storage}/delete?path={path}", method: "post" },
